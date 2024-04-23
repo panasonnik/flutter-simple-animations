@@ -12,9 +12,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
-  double _currentSliderValue = 50;
   late AnimationController _controller;
   late Animation<double> _animation;
+
+  double _currentSliderValue = 50;
+
   @override
   void initState() {
     super.initState();
@@ -22,6 +24,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
+
     _animation = Tween<double>(begin: 0, end: _currentSliderValue).animate(
       CurvedAnimation(
         parent: _controller,
@@ -40,7 +43,6 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -53,12 +55,20 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 500),
-                width: 50,
-                height: _currentSliderValue,
-                color: Colors.amber,
-                child: Text(_currentSliderValue.round().toString()),
+              AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return Container(
+                    width: 50,
+                    height: _animation.value,
+                    color: Colors.amber,
+                    child: Center(
+                      child: Text(
+                        _animation.value.round().toString(),
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 20.0),
               Slider(
@@ -69,6 +79,16 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                 onChanged: (double value) {
                   setState(() {
                     _currentSliderValue = value;
+                    _animation =
+                        Tween<double>(begin: 0, end: _currentSliderValue)
+                            .animate(
+                      CurvedAnimation(
+                        parent: _controller,
+                        curve: Curves.easeInOut,
+                      ),
+                    );
+                    _controller.animateTo(value,
+                        duration: const Duration(milliseconds: 500));
                   });
                 },
               ),
